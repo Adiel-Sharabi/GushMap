@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Map Viewer - Select Location</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+        .locations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            padding: 20px 0;
+        }
+
+        .location-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            text-decoration: none;
+            color: #333;
+            border: 2px solid transparent;
+        }
+
+        .location-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+            border-color: rgba(102, 126, 234, 0.3);
+            background: rgba(255, 255, 255, 1);
+        }
+
+        .location-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .location-name {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+
+        .location-description {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 32px;
+            }
+
+            .header p {
+                font-size: 16px;
+            }
+
+            .locations-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .location-card {
+                padding: 30px 20px;
+            }
+
+            .location-icon {
+                font-size: 48px;
+            }
+
+            .location-name {
+                font-size: 24px;
+            }
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>3D Map Viewer</h1>
+            <p>Select a location to explore</p>
+        </div>
+
+        <div class="locations-grid">
+            <a href="carmatz1.html" class="location-card">
+                <div class="location-icon">🏘️</div>
+                <div class="location-name">Carmatz 1</div>
+                <div class="location-description">
+                    Interactive 3D orthophoto map viewer<br>
+                    Drag to rotate • Right-click to pan • Scroll to zoom
+                </div>
+            </a>
+
+            <a href="carmatz2.html" class="location-card">
+                <div class="location-icon">🏘️</div>
+                <div class="location-name">Carmatz 2</div>
+                <div class="location-description">
+                    Interactive 3D orthophoto map viewer<br>
+                    Drag to rotate • Right-click to pan • Scroll to zoom
+                </div>
+            </a>
+        </div>
+
+        <div class="footer">
+            Powered by Google Model Viewer
+        </div>
+    </div>
+</body>
+</html>

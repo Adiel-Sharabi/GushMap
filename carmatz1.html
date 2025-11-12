@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Model Viewer - Carmatz 1</title>
+
+    <!-- Google Model Viewer -->
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a1a;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            color: #fff;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .viewer-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+        }
+
+        model-viewer {
+            width: 100%;
+            height: 100%;
+            --poster-color: transparent;
+        }
+
+        /* Back Button */
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 12px 20px;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.6);
+        }
+
+        /* Floating Reset Button */
+        .reset-btn {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 16px 32px;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .reset-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: translateX(-50%) translateY(-2px);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.6);
+        }
+
+        .reset-btn:active {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Compact info display */
+        .info-overlay {
+            position: absolute;
+            bottom: 30px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 100;
+            max-width: 200px;
+        }
+
+        .info-overlay div {
+            margin: 4px 0;
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        .loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        .loading-text {
+            color: white;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        .loading-progress {
+            color: #667eea;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .back-btn {
+                top: 10px;
+                left: 10px;
+                padding: 10px 16px;
+                font-size: 13px;
+            }
+
+            .reset-btn {
+                bottom: 20px;
+                padding: 14px 28px;
+                font-size: 15px;
+            }
+
+            .info-overlay {
+                display: none;
+            }
+
+            /* Hide camera position on mobile for cleaner view */
+            .camera-position {
+                display: none !important;
+            }
+        }
+
+        /* Camera position display - desktop only */
+        .camera-position {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 12px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            color: #00ff00;
+            border: 1px solid rgba(0, 255, 0, 0.2);
+            z-index: 100;
+        }
+
+        .camera-position div {
+            margin: 3px 0;
+        }
+
+        /* Location Title */
+        .location-title {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 12px 24px;
+            border-radius: 12px;
+            color: white;
+            font-size: 18px;
+            font-weight: 700;
+            z-index: 100;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="viewer-container">
+            <div class="loading-overlay" id="loadingOverlay">
+                <div class="spinner"></div>
+                <div class="loading-text">Loading 3D Model...</div>
+                <div class="loading-progress" id="loadingProgress">Preparing...</div>
+            </div>
+
+            <model-viewer
+                id="modelViewer"
+                camera-controls
+                shadow-intensity="1"
+                environment-image="neutral"
+                exposure="1"
+                shadow-softness="1"
+                ar
+                ar-modes="webxr scene-viewer quick-look"
+                camera-orbit="0deg 150deg 3m"
+                min-camera-orbit="0deg 120deg 1m"
+                max-camera-orbit="0deg 180deg 10m"
+                orientation="0deg 0deg 0deg"
+                interaction-prompt="auto">
+            </model-viewer>
+        </div>
+
+        <!-- Back Button -->
+        <a href="index.html" class="back-btn">← Back to Menu</a>
+
+        <!-- Location Title -->
+        <div class="location-title">Carmatz 1</div>
+
+        <!-- Floating Reset Button -->
+        <button class="reset-btn" onclick="resetCamera()">↻ Reset View</button>
+
+        <!-- Camera Position Display (Desktop Only) -->
+        <div class="camera-position">
+            <div><strong>Phi:</strong> <span id="cameraPhi">150°</span></div>
+            <div><strong>Distance:</strong> <span id="cameraDistance">3m</span></div>
+            <div><strong>Rotation:</strong> <span id="mapRotation">0°</span></div>
+        </div>
+
+        <!-- Info Overlay (Desktop Only) -->
+        <div class="info-overlay">
+            <div>🖱️ Drag: Spin map</div>
+            <div>🖱️ Right-click: Pan</div>
+            <div>🔍 Scroll: Zoom</div>
+        </div>
+    </div>
+
+    <script>
+        const modelViewer = document.getElementById('modelViewer');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const loadingProgress = document.getElementById('loadingProgress');
+
+        // MEGA file link
+        const MEGA_LINK = 'https://mega.nz/file/IDAWETqA#rQ20OCQ30MTIVkKhYAkJnrIMt1o7oyZYoyGA985oH8c';
+
+        // Hide loading overlay when model loads
+        modelViewer.addEventListener('load', () => {
+            loadingOverlay.classList.add('hidden');
+        });
+
+        // Reset camera to default position (overhead view)
+        function resetCamera() {
+            // Reset camera orbit and position
+            modelViewer.cameraOrbit = '0deg 150deg 3m';
+            modelViewer.fieldOfView = '45deg';
+
+            // Reset camera target (pan position to center)
+            modelViewer.cameraTarget = '0m 0m 0m';
+
+            // Reset map rotation (X-axis)
+            currentRotationZ = 0;
+            modelViewer.orientation = '0deg 0deg 0deg';
+            document.getElementById('mapRotation').textContent = '0°';
+
+            // Update display
+            updateCameraPosition();
+
+            // Add a brief visual feedback
+            const viewer = document.querySelector('.viewer-container');
+            viewer.style.transform = 'scale(0.98)';
+            setTimeout(() => {
+                viewer.style.transform = 'scale(1)';
+            }, 200);
+        }
+
+        // Add smooth transition for viewer container
+        document.querySelector('.viewer-container').style.transition = 'transform 0.2s ease';
+
+        // Update camera position display in real-time
+        function updateCameraPosition() {
+            const orbit = modelViewer.getCameraOrbit();
+            const target = modelViewer.getCameraTarget();
+
+            // Update spherical coordinates (phi, radius)
+            document.getElementById('cameraPhi').textContent = Math.round(orbit.phi * 180 / Math.PI) + '°';
+            document.getElementById('cameraDistance').textContent = orbit.radius.toFixed(2) + 'm';
+        }
+
+        // Update position on camera change
+        modelViewer.addEventListener('camera-change', updateCameraPosition);
+
+        // Initial update when model loads
+        modelViewer.addEventListener('load', () => {
+            console.log('Model loaded successfully');
+            updateCameraPosition();
+        });
+
+        // Handle errors
+        modelViewer.addEventListener('error', (event) => {
+            console.error('Error loading model:', event);
+            loadingProgress.textContent = 'Error loading model';
+            loadingProgress.style.color = '#f5576c';
+        });
+
+        // Custom rotation handling - spin model on horizontal drag
+        let isDragging = false;
+        let startX = 0;
+        let currentRotationZ = 0;
+
+        modelViewer.addEventListener('mousedown', (e) => {
+            // Only handle left mouse button (not right-click for panning)
+            if (e.button === 0) {
+                isDragging = true;
+                startX = e.clientX;
+            }
+        });
+
+        modelViewer.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+
+            const deltaX = e.clientX - startX;
+            startX = e.clientX;
+
+            // Rotate model around X-axis (vertical axis for this orthophoto orientation)
+            // Positive to make drag feel natural (drag right = rotate right)
+            currentRotationZ += deltaX * 0.5;
+
+            // Update model orientation - X-axis rotation for map spinning
+            modelViewer.orientation = `${currentRotationZ}deg 0deg 0deg`;
+
+            // Update display
+            document.getElementById('mapRotation').textContent = Math.round(currentRotationZ) + '°';
+        });
+
+        modelViewer.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        modelViewer.addEventListener('mouseleave', () => {
+            isDragging = false;
+        });
+
+        // Touch support for mobile
+        let touchStartX = 0;
+
+        modelViewer.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+                touchStartX = e.touches[0].clientX;
+            }
+        });
+
+        modelViewer.addEventListener('touchmove', (e) => {
+            if (e.touches.length === 1) {
+                const deltaX = e.touches[0].clientX - touchStartX;
+                touchStartX = e.touches[0].clientX;
+
+                // Rotate model around X-axis
+                currentRotationZ += deltaX * 0.5;
+                modelViewer.orientation = `${currentRotationZ}deg 0deg 0deg`;
+
+                // Update display
+                document.getElementById('mapRotation').textContent = Math.round(currentRotationZ) + '°';
+            }
+        });
+
+        // ========================================
+        // MEGA FILE LOADING
+        // ========================================
+
+        // Convert MEGA share link to direct download (requires MEGA SDK or proxy)
+        // For now, show instruction to user
+        async function loadModelFromMEGA() {
+            try {
+                loadingProgress.textContent = 'Connecting to MEGA...';
+
+                // NOTE: Direct MEGA loading requires mega.js SDK or a proxy service
+                // For GitHub Pages, we'll need to use a different approach
+
+                // Option 1: Use a MEGA proxy service (megadownloader)
+                // Option 2: Convert MEGA link to direct download manually
+                // Option 3: Host files on GitHub Releases instead
+
+                // For now, display instruction
+                loadingProgress.textContent = 'Please convert MEGA link to direct download';
+                loadingProgress.style.color = '#ffaa00';
+
+                console.log('MEGA Link:', MEGA_LINK);
+                console.log('To enable direct loading, either:');
+                console.log('1. Use megatools to get direct download link');
+                console.log('2. Upload to GitHub Releases');
+                console.log('3. Use another hosting service with direct links');
+
+            } catch (error) {
+                console.error('Error loading from MEGA:', error);
+                loadingProgress.textContent = 'Error loading model';
+                loadingProgress.style.color = '#f5576c';
+            }
+        }
+
+        // Load model on page load
+        // loadModelFromMEGA(); // Commented out until we have direct download link
+
+        // Temporary: Show message that we need direct download link
+        loadingProgress.textContent = 'Waiting for model configuration...';
+        loadingProgress.style.color = '#ffaa00';
+    </script>
+</body>
+</html>
