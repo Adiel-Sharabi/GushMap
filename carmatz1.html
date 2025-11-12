@@ -250,6 +250,7 @@
 
             <model-viewer
                 id="modelViewer"
+                src="carmatz1.glb"
                 camera-controls
                 shadow-intensity="1"
                 environment-image="neutral"
@@ -293,9 +294,6 @@
         const modelViewer = document.getElementById('modelViewer');
         const loadingOverlay = document.getElementById('loadingOverlay');
         const loadingProgress = document.getElementById('loadingProgress');
-
-        // MEGA file link
-        const MEGA_LINK = 'https://mega.nz/file/IDAWETqA#rQ20OCQ30MTIVkKhYAkJnrIMt1o7oyZYoyGA985oH8c';
 
         // Hide loading overlay when model loads
         modelViewer.addEventListener('load', () => {
@@ -416,47 +414,6 @@
                 document.getElementById('mapRotation').textContent = Math.round(currentRotationZ) + '°';
             }
         });
-
-        // ========================================
-        // MEGA FILE LOADING
-        // ========================================
-
-        // Convert MEGA share link to direct download (requires MEGA SDK or proxy)
-        // For now, show instruction to user
-        async function loadModelFromMEGA() {
-            try {
-                loadingProgress.textContent = 'Connecting to MEGA...';
-
-                // NOTE: Direct MEGA loading requires mega.js SDK or a proxy service
-                // For GitHub Pages, we'll need to use a different approach
-
-                // Option 1: Use a MEGA proxy service (megadownloader)
-                // Option 2: Convert MEGA link to direct download manually
-                // Option 3: Host files on GitHub Releases instead
-
-                // For now, display instruction
-                loadingProgress.textContent = 'Please convert MEGA link to direct download';
-                loadingProgress.style.color = '#ffaa00';
-
-                console.log('MEGA Link:', MEGA_LINK);
-                console.log('To enable direct loading, either:');
-                console.log('1. Use megatools to get direct download link');
-                console.log('2. Upload to GitHub Releases');
-                console.log('3. Use another hosting service with direct links');
-
-            } catch (error) {
-                console.error('Error loading from MEGA:', error);
-                loadingProgress.textContent = 'Error loading model';
-                loadingProgress.style.color = '#f5576c';
-            }
-        }
-
-        // Load model on page load
-        // loadModelFromMEGA(); // Commented out until we have direct download link
-
-        // Temporary: Show message that we need direct download link
-        loadingProgress.textContent = 'Waiting for model configuration...';
-        loadingProgress.style.color = '#ffaa00';
     </script>
 </body>
 </html>
