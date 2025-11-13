@@ -475,28 +475,10 @@
             isDragging = false;
         });
 
-        // Touch support for mobile
-        let touchStartX = 0;
-
-        modelViewer.addEventListener('touchstart', (e) => {
-            if (e.touches.length === 1) {
-                touchStartX = e.touches[0].clientX;
-            }
-        });
-
-        modelViewer.addEventListener('touchmove', (e) => {
-            if (e.touches.length === 1) {
-                const deltaX = e.touches[0].clientX - touchStartX;
-                touchStartX = e.touches[0].clientX;
-
-                // Rotate model around X-axis
-                currentRotationZ += deltaX * 0.5;
-                modelViewer.orientation = `${currentRotationZ}deg 0deg 0deg`;
-
-                // Update display
-                document.getElementById('mapRotation').textContent = Math.round(currentRotationZ) + '°';
-            }
-        });
+        // Touch gestures handled natively by model-viewer:
+        // - Single touch: orbit camera
+        // - Two fingers: pan
+        // - Pinch: zoom
 
         // ========================================
         // CACHE MANAGEMENT
